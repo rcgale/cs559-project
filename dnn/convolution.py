@@ -30,7 +30,7 @@ class Convolution2d(Function):
 
         X_padded = np.pad(X, [(0,0), (0,0), (P0, P0), (P1, P1)])
 
-        out = np.zeros((N, CO, 1 + (X0 + 2 * P0 - K0) // S0, 1 + (X1 + 2 * P1 - K1) // S1))
+        out = np.zeros((N, CO, (1 + (X0 + 2 * P0 - K0) // S0), (1 + (X1 + 2 * P1 - K1) // S1)))
 
         for ci in range(self.in_channels):
             # Optimization: not iterating over N so numpy has some room to do threaded computations
@@ -67,7 +67,7 @@ class Convolution2d(Function):
                 dw[co, ci] += np.sum(X_window * dy[:, co, x0:x0+1, x1:x1+1], axis=(0))
 
         # Trim off padding from dx
-        dx = dx[:, :, P0:-P0, P1:-P1]
+        dx = dx[:, :, P0:dx.shape[2]-P0, P1:dx.shape[3]-P1]
 
         return dx, dw, db
 
