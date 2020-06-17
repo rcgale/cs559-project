@@ -5,10 +5,6 @@ from dnn.backprop import Function
 
 class Sigmoid(Function):
     def forward(self, X):
-        # sigmoid = np.zeros_like(X)
-        # lt0 = X < 0
-        # sigmoid[lt0] = np.exp(X[lt0]) / (1 + np.exp(X[lt0]))
-        # sigmoid[-1 * lt0] = 1 / (1 + np.exp(-X[-1 * lt0]))
         return  1 / (1 + np.exp(-X))
 
     def _backward(self, X, f_X, delta_current, update):

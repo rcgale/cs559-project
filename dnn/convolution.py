@@ -32,13 +32,12 @@ class Convolution2d(Function):
 
         out = np.zeros((N, CO, (1 + (X0 + 2 * P0 - K0) // S0), (1 + (X1 + 2 * P1 - K1) // S1)))
 
-        for ci in range(self.in_channels):
-            # Optimization: not iterating over N so numpy has some room to do threaded computations
-            for (co, x0, x1), _ in np.ndenumerate(out[0]):
-                x0_slice = slice((x0 * S0), (x0 * S0 + K0))
-                x1_slice = slice((x1 * S1), (x1 * S1 + K1))
-                X_window = X_padded[:, ci, x0_slice, x1_slice]
-                out[:, co, x0, x1] += np.sum(X_window * self.weights[co, ci], axis=(1,2)) + self.bias[co]
+        # Optimization: not iterating over N or channels so numpy has some room to do parallel computations
+        for (x0, x1), _ in np.ndenumerate(out[0, 0]):
+            x0_slice = slice((x0 * S0), (x0 * S0 + K0))
+            x1_slice = slice((x1 * S1), (x1 * S1 + K1))
+            X_window = np.expand_dims(X_padded[:, :, x0_slice, x1_slice], 1)
+            out[:, :, x0, x1] += np.sum(np.multiply(X_window, self.weights), axis=(2, 3, 4)) + self.in_channels * self.bias[:]
         return out
 
     def _backward(self, X, f_X, dy, update):
@@ -55,16 +54,16 @@ class Convolution2d(Function):
 
         db += np.sum(dy, axis=(0, 2, 3)) * self.in_channels
 
-        for ci in range(self.in_channels):
-            # Optimization: not iterating over N so numpy has some room to do threaded computations
-            for (co, x0, x1), _ in np.ndenumerate(dy[0]):
-                x0_slice = slice((x0 * S0), (x0 * S0 + K0)) # Start and stop points for convolutional window
-                x1_slice = slice((x1 * S1), (x1 * S1 + K1)) # Start and stop points for convolutional window
+        # Optimization: not iterating over N so numpy has some room to do threaded computations
+        for (x0, x1), _ in np.ndenumerate(dy[0, 0]):
+            x0_slice = slice((x0 * S0), (x0 * S0 + K0)) # Start and stop points for convolutional window
+            x1_slice = slice((x1 * S1), (x1 * S1 + K1)) # Start and stop points for convolutional window
 
-                dx[:, ci, x0_slice, x1_slice] += self.weights[co, ci] * dy[:, co, x0:x0+1, x1:x1+1]
+            dy_expanded = np.expand_dims(dy[:, :, x0:x0+1, x1:x1+1], 2) # Adding a channel in dimension
+            dx[:, :, x0_slice, x1_slice] += np.sum(np.multiply(self.weights[:, :], dy_expanded), axis=(1))
 
-                X_window = X_padded[:, ci, x0_slice, x1_slice]
-                dw[co, ci] += np.sum(X_window * dy[:, co, x0:x0+1, x1:x1+1], axis=(0))
+            X_window = np.expand_dims(X_padded[:, :, x0_slice, x1_slice], 1)
+            dw[:, :] += np.sum(np.multiply(X_window, dy_expanded), axis=(0))
 
         # Trim off padding from dx
         dx = dx[:, :, P0:dx.shape[2]-P0, P1:dx.shape[3]-P1]
@@ -105,9 +104,9 @@ class MaxPool2d(Function):
         out_height = int(1 + (X.shape[2] - self.pool_size[0]) / self.stride[0])
         out_width = int(1 + (X.shape[3] - self.pool_size[1]) / self.stride[1])
         out = np.zeros([X.shape[0], X.shape[1], out_height, out_width])
-        for (n, c, x1, x2), _ in np.ndenumerate(out):
+        for (x1, x2), _ in np.ndenumerate(out[0, 0]):
             x1_slice, x2_slice = _slices(x1, x2, self.pool_size[0], self.pool_size[1], self.stride)
-            out[n, c, x1, x2] = np.max(X[n, c, x1_slice, x2_slice])
+            out[x1, x2] = np.max(X[n, c, x1_slice, x2_slice])
         return out
 
     def _backward(self, X, f_X, dy, update):

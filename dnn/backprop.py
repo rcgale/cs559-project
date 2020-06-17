@@ -1,4 +1,10 @@
+import multiprocessing
+from multiprocessing import Pool
+
 import numpy as np
+
+MAX_PROCESSES = max(1, multiprocessing.cpu_count() - 1)
+
 
 class Function(object):
     def __init__(self):
@@ -28,6 +34,9 @@ class BackpropWrapper(np.ndarray):
             return f_X.view(self)
         arr = np.array(f_X)
         return np.ndarray.__new__(BackpropWrapper, shape=arr.shape, dtype=arr.dtype, buffer=arr)
+
+    def detach(self):
+        return np.array(self).copy()
 
     def backward(self, dy=None, update=True, learn_rate=0):
         if dy is None:

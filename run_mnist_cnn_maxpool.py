@@ -1,12 +1,12 @@
-import argparse
-
 import numpy as np
 import sklearn.preprocessing
 from sklearn.datasets import fetch_openml
 from sklearn.model_selection import train_test_split
 
 import dnn
-import dnn.convolution
+from dnn.activations import ReLU
+from dnn.convolution import Convolution2d, MaxPool2d
+from dnn.layers import Reshape, Linear
 from dnn.train import do_train
 
 np.random.seed(168153852)
@@ -26,15 +26,15 @@ def main():
     X_test = scaler.transform(X_test)
 
     cnn = dnn.layers.Sequential(
-        dnn.layers.Reshape((1, 28, 28)),
-        dnn.convolution.Convolution2d(kernel=(3, 3), in_channels=1, out_channels=16, pad='same'),
-        dnn.activations.ReLU(),
-        dnn.convolution.Convolution2d(kernel=(3, 3), in_channels=16, out_channels=32),
-        dnn.activations.ReLU(),
-        dnn.layers.Reshape((-1,)),
-        dnn.layers.Linear(25088, 1024),
-        dnn.activations.Sigmoid(),
-        dnn.layers.Linear(1024, len(dictionary)),
+        Reshape((1, 28, 28)),
+        Convolution2d(kernel=(3, 3), in_channels=1, out_channels=16, pad='same'),
+        ReLU(),
+        MaxPool2d((3,3)),
+        Convolution2d(kernel=(3, 3), in_channels=16, out_channels=32),
+        ReLU(),
+        MaxPool2d((3,3)),
+        Reshape((-1,)),
+        Linear(18432, len(dictionary)),
     )
 
     do_train(
@@ -46,9 +46,9 @@ def main():
         cost_function=dnn.loss.CrossEntropyLoss(),
         epochs=30,
         batch_size=100,
-        learn_rate=0.001,
+        learn_rate=0.0001,
         decay=0.9999,
-        exp_name='mnist_playground'
+        exp_name='mnist_cnn_maxpool'
     )
 
 

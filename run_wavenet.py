@@ -9,6 +9,7 @@ import data
 import dnn
 
 import dnn.convolution
+import dnn.train
 
 LONGEST_UTTERANCE = 89836 # frames
 # LONGEST_UTTERANCE = 562 # windows
@@ -127,7 +128,7 @@ def main():
     learn_rate = 0.001
     decay = 0.9999
 
-    train_iterator = data.prep.DataIterator(train_X, train_y, batch_size=batch_size)
+    train_iterator = dnn.train.DataIterator(train_X, train_y, batch_size=batch_size)
 
     for e in range(epochs):
         epoch_loss = 0

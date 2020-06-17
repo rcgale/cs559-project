@@ -1,21 +1,14 @@
 import argparse
-import os
-import pickle
-from datetime import datetime
 
 import numpy as np
-import pandas as pd
 import sklearn
 from sklearn.model_selection import GroupShuffleSplit
 
 import data
 import dnn
-# LONGEST_UTTERANCE = 89836 # frames
-from dnn.activations import ReLU
-from dnn.convolution import Convolution2d
-from dnn.layers import Linear, Flatten, Reshape
 from dnn.train import do_train
 
+# LONGEST_UTTERANCE = 89836 # frames
 LONGEST_UTTERANCE = 562 # windows
 
 RANDOM_STATE = 168153852
@@ -32,11 +25,10 @@ def main():
         u
         for u in data.cslu_kids.get_all(args.cslu, scripted=True, spontaneous=False)
         if ' ' not in u.transcript
-            and u.transcript in ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
+            and u.transcript in ['one', 'two', 'three', 'four']
     ]
 
     X, y, dictionary = data.prep.get_X_y(single_word_utterances, max_length=LONGEST_UTTERANCE, n_features=26)
-    reverse_dictionary = list(dictionary.keys())
 
     grouped_split = GroupShuffleSplit(n_splits=1, train_size=0.8, random_state=RANDOM_STATE)
 
@@ -48,18 +40,16 @@ def main():
     X_train = scaler.fit_transform(X_train.reshape((len(X_train), -1))).reshape(X_train.shape)
     X_test = scaler.transform(X_test.reshape((len(X_test), -1))).reshape(X_test.shape)
 
-
-    # train_X, val_X, train_y, val_y = train_test_split(train_X, train_y, train_size=len(X) - int(.2 * len(X)), test_size=int(.2 * len(X)))
     print(f'train size: {len(y_train)}, test size: {len(y_test)}')
 
     cnn = dnn.layers.Sequential(
-        Reshape((1, -1, 26)),
-        Convolution2d(kernel=(11, 25), in_channels=1, out_channels=32, stride=(2, 2), pad=(0, 'same')),
-        ReLU(),
-        Convolution2d(kernel=(11, 13), in_channels=32, out_channels=32, stride=(2, 2), pad=(0, 'same')),
-        ReLU(),
-        Flatten(),
-        Linear(132096, len(dictionary)),
+        dnn.layers.Reshape((1, -1, 26)),
+        dnn.convolution.Convolution2d(kernel=(11, 25), in_channels=1, out_channels=32, stride=(2, 2), pad=(0, 'same')),
+        dnn.activations.ReLU(),
+        dnn.convolution.Convolution2d(kernel=(11, 13), in_channels=32, out_channels=32, stride=(2, 2), pad=(0, 'same')),
+        dnn.activations.ReLU(),
+        dnn.layers.Flatten(),
+        dnn.layers.Linear(116960, len(dictionary)),
     )
 
     do_train(
@@ -73,9 +63,8 @@ def main():
         batch_size=40,
         learn_rate=0.0001,
         decay=0.9999,
-        exp_name='tenwords'
+        exp_name='fourwords'
     )
-
 
 
 if __name__ == '__main__':

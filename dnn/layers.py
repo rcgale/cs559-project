@@ -17,12 +17,12 @@ class Linear(Function):
     def forward(self, X):
         if X.shape[-1] != self.weights.shape[0]:
             raise ValueError(f'Expected input shape {self.weights.shape[0]}, got {X.shape[-1]}')
-        return X @ self.weights + self.bias
+        return np.dot(X, self.weights) + self.bias
 
 
     def _backward(self, X, f_X, dy, update):
-        dx = dy @ self.weights.T
-        dw = X.T @ dy
+        dx = np.dot(dy, self.weights.T)
+        dw = np.dot(X.T, dy)
         db = np.sum(dy, axis=(0)).reshape(self.bias.shape)
         return dx, dw, db
 

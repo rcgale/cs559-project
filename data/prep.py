@@ -3,28 +3,6 @@ import python_speech_features
 import data
 import numpy as np
 
-class DataIterator(object):
-    def __init__(self, X, y, batch_size):
-        self.X = X
-        self.y = y
-        self.batch_size = batch_size
-
-    def __call__(self, epochs=1):
-        for n in range(1, epochs + 1):
-            return self.iterate_epoch(self.X, self.y)
-
-    def iterate_epoch(self, X, y):
-        if self.batch_size is None:
-            yield X, y
-        shuffled = np.random.choice(len(X), len(X), replace=False)
-        start = 0
-        end = min(start + self.batch_size, len(shuffled))
-        while start < len(shuffled):
-            batch = shuffled[start:end]
-            yield X[batch], y[batch]
-            start += self.batch_size
-            end = min(start + self.batch_size, len(shuffled))
-
 
 def get_X_y(utterances, max_length, n_features):
     dictionary = { word: i for i, word in enumerate(sorted(set(u.transcript for u in utterances))) }

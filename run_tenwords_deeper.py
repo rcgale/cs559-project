@@ -12,6 +12,7 @@ import data
 import dnn
 # LONGEST_UTTERANCE = 89836 # frames
 import dnn.convolution
+import dnn.train
 
 LONGEST_UTTERANCE = 562 # windows
 
@@ -68,7 +69,7 @@ def main():
     learn_rate = 0.0001
     decay = 0.9999
 
-    train_iterator = data.prep.DataIterator(train_X, train_y, batch_size=batch_size)
+    train_iterator = dnn.train.DataIterator(train_X, train_y, batch_size=batch_size)
 
     start_time = datetime.now().strftime("%Y%m%d_%H%M%S")
     for e in range(epochs):
@@ -87,8 +88,8 @@ def main():
             batch_mae = np.mean(np.argmax(y_hat, axis=1) != batch_y)
             loss = cross_entropy(batch_y, y_hat)
             loss.backward(learn_rate=learn_rate)
-            epoch_loss += loss
-            batch_loss = loss / len(batch_y)
+            epoch_loss += np.array(loss)
+            batch_loss = np.array(loss) / len(batch_y)
             loss_so_far = epoch_loss / (len(batch_y) + batch_size * (b))
             print(f'Epoch {e} | Batch {b} | MAE: {batch_mae:.3f} | learn rate: {learn_rate:.6f} | '
                   f'batch loss: {batch_loss:.5f} | epoch_loss: {loss_so_far:.5f}')
@@ -103,6 +104,14 @@ def main():
         test_loss = cross_entropy(test_y, test_y_hat)
         print(f'Epoch {e} | Test MAE: {test_mae:.3f} | test loss: {test_loss/len(test_y):.5f}')
 
+        if test_loss > previous_test_loss:
+            early_stop_count += 1
+            if early_stop_count == 3:
+                print ('Early stopping')
+                break
+        else:
+            early_stop_count = 0
+        previous_test_loss = np.array(test_loss)
 
 
 

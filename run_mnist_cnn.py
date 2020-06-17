@@ -32,9 +32,7 @@ def main():
         dnn.convolution.Convolution2d(kernel=(3, 3), in_channels=16, out_channels=32),
         dnn.activations.ReLU(),
         dnn.layers.Reshape((-1,)),
-        dnn.layers.Linear(25088, 1024),
-        dnn.activations.Sigmoid(),
-        dnn.layers.Linear(1024, len(dictionary)),
+        dnn.layers.Linear(25088, len(dictionary)),
     )
 
     do_train(
@@ -46,9 +44,9 @@ def main():
         cost_function=dnn.loss.CrossEntropyLoss(),
         epochs=30,
         batch_size=100,
-        learn_rate=0.001,
+        learn_rate=0.0001,
         decay=0.9999,
-        exp_name='mnist_playground'
+        exp_name='mnist_cnn'
     )
 
 

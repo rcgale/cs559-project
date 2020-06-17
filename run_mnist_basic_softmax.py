@@ -6,7 +6,8 @@ from sklearn.datasets import fetch_openml
 from sklearn.model_selection import train_test_split
 
 import dnn
-import dnn.convolution
+from dnn.activations import Sigmoid
+from dnn.layers import Linear, Reshape
 from dnn.train import do_train
 
 np.random.seed(168153852)
@@ -15,6 +16,7 @@ def main():
     X, y = fetch_openml('mnist_784', version=1, return_X_y=True)
 
     dictionary = { label: n for n, label in enumerate(sorted(set(y))) }
+    reverse_dictionary = list(dictionary.keys())
 
     y = np.array([dictionary[label] for label in y])
 
@@ -26,15 +28,10 @@ def main():
     X_test = scaler.transform(X_test)
 
     cnn = dnn.layers.Sequential(
-        dnn.layers.Reshape((1, 28, 28)),
-        dnn.convolution.Convolution2d(kernel=(3, 3), in_channels=1, out_channels=16, pad='same'),
-        dnn.activations.ReLU(),
-        dnn.convolution.Convolution2d(kernel=(3, 3), in_channels=16, out_channels=32),
-        dnn.activations.ReLU(),
-        dnn.layers.Reshape((-1,)),
-        dnn.layers.Linear(25088, 1024),
-        dnn.activations.Sigmoid(),
-        dnn.layers.Linear(1024, len(dictionary)),
+        Reshape((-1,)),
+        Linear(784, 256),
+        Sigmoid(),
+        Linear(256, len(dictionary)),
     )
 
     do_train(
@@ -44,12 +41,13 @@ def main():
         X_test=X_test,
         y_test=y_test,
         cost_function=dnn.loss.CrossEntropyLoss(),
-        epochs=30,
+        epochs=100,
         batch_size=100,
         learn_rate=0.001,
         decay=0.9999,
-        exp_name='mnist_playground'
+        exp_name='mnist_baseline'
     )
+
 
 
 if __name__ == '__main__':
