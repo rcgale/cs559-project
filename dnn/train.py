@@ -1,3 +1,4 @@
+import gc
 import os
 import pickle
 from datetime import datetime
@@ -47,6 +48,7 @@ def do_train(model, X_train, y_train, X_test, y_test, cost_function, epochs, bat
         epoch_loss = 0
         epoch_absolute_error = 0
         for b, (batch_X, batch_y) in enumerate(train_iterator()):
+            gc.collect()
             batch_loss, batch_mae = do_batch(model, batch_X, batch_y, cost_function, learn_rate)
             epoch_absolute_error += len(batch_y) * batch_mae
             epoch_loss += np.array(batch_loss)
@@ -63,7 +65,6 @@ def do_train(model, X_train, y_train, X_test, y_test, cost_function, epochs, bat
         test_mae = np.mean(np.argmax(test_y_hat, axis=1) != y_test)
         test_loss = cost_function(y_test, test_y_hat)
         print(f'Epoch {e} | Test MAE: {test_mae:.3f} | test loss: {test_loss/len(y_test):.5f}')
-
         train_stats.append({
             'epoch': e,
             'learn_rate_end': learn_rate,
@@ -76,7 +77,7 @@ def do_train(model, X_train, y_train, X_test, y_test, cost_function, epochs, bat
         log = pd.DataFrame(train_stats).astype('float')
         log.to_csv(f'logs/{exp_name}_{start_time}.csv', index=False, float_format='%.5f')
 
-        if test_loss / previous_test_loss >= 1.00:
+        if e > 10 and test_loss / previous_test_loss >= 1.00:
             early_stop_count += 1
             if early_stop_count == 3:
                 print ('Early stopping')
@@ -84,6 +85,7 @@ def do_train(model, X_train, y_train, X_test, y_test, cost_function, epochs, bat
         else:
             early_stop_count = 0
         previous_test_loss = np.array(test_loss)
+        test_loss, test_y_hat, test_mae = None, None, None
 
 
 def do_batch(model, batch_X, batch_y, cost_function, learn_rate):

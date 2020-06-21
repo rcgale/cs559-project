@@ -32,9 +32,7 @@ def main():
         dnn.convolution.Convolution2d(kernel=(3, 3), in_channels=16, out_channels=32),
         dnn.activations.ReLU(),
         dnn.layers.Reshape((-1,)),
-        dnn.layers.Linear(25088, 1024),
-        dnn.activations.Sigmoid(),
-        dnn.layers.Linear(1024, len(dictionary)),
+        dnn.layers.Linear(25088, len(dictionary)),
     )
 
     do_train(
@@ -47,7 +45,7 @@ def main():
         epochs=30,
         batch_size=100,
         learn_rate=0.001,
-        decay=0.9999,
+        decay=1.0,
         exp_name='mnist_playground'
     )
 

@@ -7,9 +7,9 @@ class Sigmoid(Function):
     def forward(self, X):
         return  1 / (1 + np.exp(-X))
 
-    def _backward(self, X, f_X, delta_current, update):
+    def _backward(self, X, f_X, dy):
         gradient = np.multiply(f_X, (1 - f_X))
-        dx = delta_current * gradient
+        dx = dy * gradient
         return dx, None, None
 
 
@@ -19,7 +19,7 @@ class ReLU(Function):
         relu[relu < 0] = 0
         return relu
 
-    def _backward(self, X, f_X, dy, update):
+    def _backward(self, X, f_X, dy):
         dx = np.zeros_like(f_X)
         dx[f_X > 0] = 1
         dx = dy * dx

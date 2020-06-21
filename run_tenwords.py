@@ -69,7 +69,7 @@ def main():
         X_test=X_test,
         y_test=y_test,
         cost_function=dnn.loss.CrossEntropyLoss(),
-        epochs=30,
+        epochs=100,
         batch_size=40,
         learn_rate=0.0001,
         decay=0.9999,

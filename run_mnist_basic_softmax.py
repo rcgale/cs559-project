@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 
 import dnn
 from dnn.activations import Sigmoid
-from dnn.layers import Linear, Reshape
+from dnn.layers import Linear, Reshape, Sequential
 from dnn.train import do_train
 
 np.random.seed(168153852)
@@ -27,7 +27,7 @@ def main():
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
 
-    cnn = dnn.layers.Sequential(
+    dnn = Sequential(
         Reshape((-1,)),
         Linear(784, 256),
         Sigmoid(),
@@ -35,7 +35,7 @@ def main():
     )
 
     do_train(
-        model=cnn,
+        model=dnn,
         X_train=X_train,
         y_train=y_train,
         X_test=X_test,
@@ -44,7 +44,7 @@ def main():
         epochs=100,
         batch_size=100,
         learn_rate=0.001,
-        decay=0.9999,
+        decay=1,
         exp_name='mnist_baseline'
     )
 

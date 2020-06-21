@@ -4,9 +4,8 @@ from dnn.backprop import Function
 
 
 class Linear(Function):
-    def __init__(self, input_size, output_size, weights=None, bias=None, use_bias=True):
+    def __init__(self, input_size, output_size, weights=None, bias=None):
         super().__init__()
-        self.use_bias = use_bias
         self.weights = weights
         if weights is None:
             self.weights = np.random.normal(scale=1/(input_size+output_size), size=(input_size, output_size))
@@ -15,12 +14,9 @@ class Linear(Function):
 
 
     def forward(self, X):
-        if X.shape[-1] != self.weights.shape[0]:
-            raise ValueError(f'Expected input shape {self.weights.shape[0]}, got {X.shape[-1]}')
         return np.dot(X, self.weights) + self.bias
 
-
-    def _backward(self, X, f_X, dy, update):
+    def _backward(self, X, f_X, dy):
         dx = np.dot(dy, self.weights.T)
         dw = np.dot(X.T, dy)
         db = np.sum(dy, axis=(0)).reshape(self.bias.shape)

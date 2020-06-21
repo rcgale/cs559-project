@@ -41,7 +41,7 @@ class BackpropWrapper(np.ndarray):
     def backward(self, dy=None, update=True, learn_rate=0):
         if dy is None:
             dy = np.ones_like(self._f_X)
-        dx, dw, db = self.module._backward(*self._args, self._f_X, dy, update)
+        dx, dw, db = self.module._backward(*self._args, self._f_X, dy)
 
         if update and hasattr(self.module, 'weights'):
             self.module.weights -= learn_rate * dw
