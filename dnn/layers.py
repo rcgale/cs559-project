@@ -38,7 +38,7 @@ class Flatten(Function):
     def forward(self, X):
         return X.reshape((X.shape[0], -1))
 
-    def _backward(self, X, f_X, delta_current, update):
+    def _backward(self, X, f_X, delta_current):
         d = delta_current.reshape(X.shape)
         return d, d, None
 
@@ -51,6 +51,6 @@ class Reshape(Function):
     def forward(self, X):
         return X.reshape((X.shape[0], *self.shape))
 
-    def _backward(self, X, f_X, delta_current, update):
+    def _backward(self, X, f_X, delta_current):
         d = delta_current.reshape(X.shape)
         return d, d, None

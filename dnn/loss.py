@@ -11,7 +11,7 @@ class CrossEntropyLoss(Function):
         loss = -np.sum(y_one_hot * np.log(softmax + NUMERICAL_STABILITY))
         return loss
 
-    def _backward(self, y_true, y_hat, f_X, delta_current, update):
+    def _backward(self, y_true, y_hat, f_X, delta_current):
         y_one_hot = self._one_hot(y_true, y_hat.shape)
         dcost_dz = self._softmax(y_hat) - y_one_hot
         return dcost_dz, None, None

@@ -40,7 +40,7 @@ class Convolution2d(Function):
             out[:, :, i, j] += np.sum(np.multiply(X_window, self.weights), axis=(2, 3, 4)) + self.in_channels * self.bias[:]
         return out
 
-    def _backward(self, X, f_X, dy, update):
+    def _backward(self, X, f_X, dy):
         P0, P1 = self._get_pad(X)
         CO, CI, K0, K1 = self.weights.shape
         S0, S1 = self.stride
@@ -109,7 +109,7 @@ class MaxPool2d(Function):
             out[n, c, x1, x2] = np.max(X[n, c, x1_slice, x2_slice])
         return out
 
-    def _backward(self, X, f_X, dy, update):
+    def _backward(self, X, f_X, dy):
         dx = np.zeros_like(X)
         for (n, c, x1, x2), value in np.ndenumerate(dy):
             x1_slice, x2_slice = _slices(x1, x2, self.pool_size[0], self.pool_size[1], self.stride)

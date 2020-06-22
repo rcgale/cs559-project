@@ -1,13 +1,11 @@
-import argparse
-
 import numpy as np
 import sklearn.preprocessing
 from sklearn.datasets import fetch_openml
 from sklearn.model_selection import train_test_split
 
-import dnn
 from dnn.activations import Sigmoid
 from dnn.layers import Linear, Reshape, Sequential
+from dnn.loss import CrossEntropyLoss
 from dnn.train import do_train
 
 np.random.seed(168153852)
@@ -40,7 +38,7 @@ def main():
         y_train=y_train,
         X_test=X_test,
         y_test=y_test,
-        cost_function=dnn.loss.CrossEntropyLoss(),
+        cost_function=CrossEntropyLoss(),
         epochs=100,
         batch_size=100,
         learn_rate=0.001,

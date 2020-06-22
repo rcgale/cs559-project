@@ -30,7 +30,7 @@ def test_gradient_wrt_x(func, x_shape):
 ###################################################
 
 TEST_CASES_WRT_W = [
-    (Linear(12, 24, use_bias=True), (2, 12)),
+    (Linear(12, 24), (2, 12)),
     (Convolution2d(kernel=(3, 3), in_channels=1, out_channels=1, pad='same'), (2, 1, 3, 3)),
     (Convolution2d(kernel=(3, 3), in_channels=1, out_channels=2, pad='same'), (2, 1, 3, 3)),
     (Convolution2d(kernel=(3, 3), in_channels=2, out_channels=1, pad='same'), (2, 2, 3, 3)),
@@ -54,7 +54,7 @@ def test_wrt_w(graph, x_shape):
 ###################################################
 
 TEST_CASES_WRT_B = [
-    (Linear(12, 24, use_bias=True), (2, 12)),
+    (Linear(12, 24), (2, 12)),
     (Convolution2d(kernel=(3, 3), in_channels=1, out_channels=1, pad='same'), (2, 1, 3, 3)),
     (Convolution2d(kernel=(3, 3), in_channels=1, out_channels=2, pad='same'), (2, 1, 3, 3)),
     (Convolution2d(kernel=(3, 3), in_channels=2, out_channels=1, pad='same'), (2, 2, 3, 3)),
